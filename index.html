@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Para ti</title>
+    <style>
+        body { 
+            background-color: #1a1a1a; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; flex-direction: column; 
+        }
+        #regalo { 
+            font-size: 100px; 
+            cursor: pointer; 
+            transition: transform 0.2s;
+        }
+        #regalo:hover { transform: scale(1.1); }
+        #lienzoFlor { display: none; } /* Oculto hasta el clic */
+    </style>
+</head>
+<body>
+
+    <!-- Regalo (puedes cambiarlo por una imagen pixel art usando <img>) -->
+    <img id="regalo" src="regalo.png" width="150" alt="Haz clic aquí">
+    
+    <canvas id="lienzoFlor" width="800" height="500"></canvas>
+    
+    <!-- Música -->
+    <audio id="musica" loop>
+        <source src="cancion.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const regalo = document.getElementById('regalo');
+        const canvas = document.getElementById('lienzoFlor');
+        const ctx = canvas.getContext('2d');
+        const musica = document.getElementById('musica');
+        
+        let theta = 0;
+
+        // Configuración de varias flores: [centro X, centro Y, tamaño, número de pétalos]
+        const flores = [
+            { x: 200, y: 250, r: 100, k: 5 },
+            { x: 400, y: 200, r: 150, k: 7 }, // Flor central más grande
+            { x: 600, y: 250, r: 100, k: 4 }
+        ];
+
+        // Interacción del clic
+        regalo.addEventListener('click', () => {
+            regalo.style.display = 'none'; // Oculta regalo
+            canvas.style.display = 'block'; // Muestra canvas
+            musica.play(); // Reproduce canción
+            ctx.strokeStyle = "#FFD700";
+            ctx.lineWidth = 3;
+            animarFlores(); // Inicia dibujo
+        });
+
+        function animarFlores() {
+            if (theta > Math.PI * 10) {
+                ctx.font = "30px Arial";
+                ctx.fillStyle = "#FFD700";
+                ctx.fillText("¡Feliz día!", 330, 450);
+                return;
+            }
+
+            flores.forEach(flor => {
+                // Ecuación polar
+                const r = flor.r * Math.sin(flor.k * theta);
+                const x = flor.x + r * Math.cos(theta);
+                const y = flor.y + r * Math.sin(theta);
+                
+                if (theta > 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(flor.lastX, flor.lastY);
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                }
+                // Guardar posición anterior para conectar las líneas
+                flor.lastX = x;
+                flor.lastY = y;
+            });
+            
+            theta += 0.02;
+            requestAnimationFrame(animarFlores);
+        }
+    </script>
+</body>
+</html>
