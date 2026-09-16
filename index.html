@@ -142,10 +142,15 @@
         function animarFlores() {
             // Cuando la matemática da 10 vueltas (termina de dibujar)
            if (theta > Math.PI * 2.5) {
-                if (!notaMostrada) {
-                    nota.style.display = 'block'; // Aparece la carta
-                    notaMostrada = true;
-                }
+               if (!notaMostrada) {
+    nota.style.display = 'block'; 
+    notaMostrada = true;
+    
+    // Temporizador para ocultarla después de 8 segundos (8000 milisegundos)
+    setTimeout(() => {
+        nota.style.display = 'none';
+    }, 8000);
+}
                 return; // Detiene la animación
             }
 
