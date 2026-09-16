@@ -1,30 +1,86 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
     <title>Para ti</title>
     <style>
-        body { 
+        body {
+            /* Aquí pones tu imagen de fondo en pixel art */
+            background-image: url('fondo.png'); 
+            background-size: cover;
+            background-position: center;
             background-color: #1a1a1a; 
-            display: flex; justify-content: center; align-items: center; 
-            height: 100vh; margin: 0; flex-direction: column; 
+            
+            /* Esto mantiene los píxeles definidos y evita que se vea borroso */
+            image-rendering: pixelated; 
+            
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            overflow: hidden; /* Evita que salgan barras de desplazamiento */
         }
-        #regalo { 
-            font-size: 100px; 
-            cursor: pointer; 
+        
+        #regalo {
+            cursor: pointer;
             transition: transform 0.2s;
+            z-index: 20;
         }
-        #regalo:hover { transform: scale(1.1); }
-        #lienzoFlor { display: none; } /* Oculto hasta el clic */
+        
+        #regalo:hover {
+            transform: scale(1.1);
+        }
+        
+        #lienzoFlor {
+            display: none; /* Oculto hasta el clic */
+        }
+
+        /* Estilo para la nota tipo carta */
+        #nota {
+            display: none;
+            background: rgba(255, 255, 230, 0.95); /* Color papel pastel */
+            padding: 30px;
+            border-radius: 10px;
+            border: 3px solid #FFD700;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 22px;
+            color: #333;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
+            z-index: 30;
+            animation: aparecer 2s ease-in;
+        }
+
+        /* Animación para que la nota aparezca suavemente */
+        @keyframes aparecer {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Regalo (puedes cambiarlo por una imagen pixel art usando <img>) -->
+    <!-- Tu regalo en pixel art -->
     <img id="regalo" src="regalo.png" width="150" alt="Haz clic aquí">
     
-    <canvas id="lienzoFlor" width="800" height="500"></canvas>
+    <!-- El espacio donde la matemática dibuja -->
+    <canvas id="lienzoFlor" width="800" height="600"></canvas>
+
+    <!-- La Nota (puedes cambiar el texto aquí) -->
+    <div id="nota">
+        <b>Para ti 🌻</b><br><br>
+        Aunque hoy no podamos vernos,<br>
+        quería regalarte estas flores amarillas.<br>
+        Espero que te hagan sonreír.
+    </div>
     
-    <!-- Música -->
+    <!-- Tu música -->
     <audio id="musica" loop>
         <source src="cancion.mp3" type="audio/mpeg">
     </audio>
@@ -34,36 +90,67 @@
         const canvas = document.getElementById('lienzoFlor');
         const ctx = canvas.getContext('2d');
         const musica = document.getElementById('musica');
+        const nota = document.getElementById('nota');
         
         let theta = 0;
+        
+        // Punto de unión de los tallos (Base del ramo)
+        const baseX = 400;
+        const baseY = 550;
 
-        // Configuración de varias flores: [centro X, centro Y, tamaño, número de pétalos]
+        // Las 7 flores: [x, y, tamaño(radio), número de pétalos]
         const flores = [
-            { x: 200, y: 250, r: 100, k: 5 },
-            { x: 400, y: 200, r: 150, k: 7 }, // Flor central más grande
-            { x: 600, y: 250, r: 100, k: 4 }
+            { x: 400, y: 150, r: 75, k: 7 }, // Centro alta
+            { x: 230, y: 220, r: 60, k: 5 }, // Izquierda 1
+            { x: 570, y: 220, r: 60, k: 5 }, // Derecha 1
+            { x: 120, y: 350, r: 50, k: 6 }, // Izquierda baja
+            { x: 680, y: 350, r: 50, k: 6 }, // Derecha baja
+            { x: 280, y: 400, r: 65, k: 8 }, // Centro izquierda
+            { x: 520, y: 400, r: 65, k: 8 }  // Centro derecha
         ];
 
-        // Interacción del clic
+        // Lógica al hacer clic
         regalo.addEventListener('click', () => {
-            regalo.style.display = 'none'; // Oculta regalo
-            canvas.style.display = 'block'; // Muestra canvas
-            musica.play(); // Reproduce canción
-            ctx.strokeStyle = "#FFD700";
-            ctx.lineWidth = 3;
-            animarFlores(); // Inicia dibujo
+            regalo.style.display = 'none'; 
+            canvas.style.display = 'block'; 
+            musica.play(); 
+            
+            dibujarTallos(); // Dibuja los tallos primero
+            animarFlores();  // Empieza a dibujar las flores y el moño
         });
 
+        function dibujarTallos() {
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#228B22"; // Color verde bosque
+            
+            flores.forEach(flor => {
+                ctx.beginPath();
+                ctx.moveTo(baseX, baseY);
+                // Curva Cuadrática de Bézier para darle caída natural al tallo
+                ctx.quadraticCurveTo(baseX + (flor.x - baseX) / 2, flor.y + 100, flor.x, flor.y);
+                ctx.stroke();
+            });
+        }
+
+        // Variables para conectar la línea continua del moño
+        let lastMonoX = baseX;
+        let lastMonoY = baseY;
+        let notaMostrada = false;
+
         function animarFlores() {
+            // Cuando la matemática da 10 vueltas (termina de dibujar)
             if (theta > Math.PI * 10) {
-                ctx.font = "30px Arial";
-                ctx.fillStyle = "#FFD700";
-                ctx.fillText("¡Feliz día!", 330, 450);
-                return;
+                if (!notaMostrada) {
+                    nota.style.display = 'block'; // Aparece la carta
+                    notaMostrada = true;
+                }
+                return; // Detiene la animación
             }
 
+            // 1. Dibujar los pétalos de las 7 flores (Ecuación polar)
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = "#FFD700"; // Amarillo
             flores.forEach(flor => {
-                // Ecuación polar
                 const r = flor.r * Math.sin(flor.k * theta);
                 const x = flor.x + r * Math.cos(theta);
                 const y = flor.y + r * Math.sin(theta);
@@ -74,12 +161,34 @@
                     ctx.lineTo(x, y);
                     ctx.stroke();
                 }
-                // Guardar posición anterior para conectar las líneas
                 flor.lastX = x;
                 flor.lastY = y;
             });
+
+            // 2. Dibujar el Moño Rojo (Lemniscata de Gerono)
+            if (theta <= Math.PI * 4) { 
+                const monoTheta = theta * 1.5; // Hacemos que se dibuje un poco más rápido
+                const amplitudX = 70; // Ancho del moño
+                const amplitudY = 30; // Alto del moño
+                
+                // Ecuación paramétrica de la Lemniscata
+                const monoX = baseX + amplitudX * Math.sin(monoTheta);
+                const monoY = baseY + amplitudY * Math.sin(2 * monoTheta); 
+                
+                ctx.strokeStyle = "#FF0000"; // Moño rojo
+                ctx.lineWidth = 4;
+                
+                if (monoTheta > 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(lastMonoX, lastMonoY);
+                    ctx.lineTo(monoX, monoY);
+                    ctx.stroke();
+                }
+                lastMonoX = monoX;
+                lastMonoY = monoY;
+            }
             
-            theta += 0.02;
+            theta += 0.02; // Velocidad de dibujo
             requestAnimationFrame(animarFlores);
         }
     </script>
