@@ -139,7 +139,7 @@
 
         function animarFlores() {
             // Cuando la matemática da 10 vueltas (termina de dibujar)
-            if (theta > Math.PI * 10) {
+           if (theta > Math.PI * 2.5) {
                 if (!notaMostrada) {
                     nota.style.display = 'block'; // Aparece la carta
                     notaMostrada = true;
@@ -188,7 +188,7 @@
                 lastMonoY = monoY;
             }
             
-            theta += 0.02; // Velocidad de dibujo
+            theta += 0.04; // Velocidad de dibujo
             requestAnimationFrame(animarFlores);
         }
     </script>
